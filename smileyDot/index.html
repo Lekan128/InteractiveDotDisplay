@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Smiley Face Dot Grid</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="circle-container" id="dotContainer"></div>
+    <script>
+        const container = document.getElementById('dotContainer');
+        const containerWidth = 600;
+        const containerHeight = 600;
+        const faceRadius = 200;  // Radius of the face
+        const dotDiameter = 10;  // Diameter of each dot
+        const eyeRadius = 20;    // Radius of each eye
+        const mouthRadius = 80;  // Radius for the mouth curvature
+    
+        function placeDots() {
+            const eyeOffsetX = 70;  // Horizontal offset of each eye from the center
+            const eyeOffsetY = -50; // Vertical offset of the eyes from the center
+            const mouthOffsetY = 50; // Vertical offset of the mouth from the center
+    
+            // Create dots
+            for (let y = -faceRadius; y <= faceRadius; y += dotDiameter) {
+                for (let x = -faceRadius; x <= faceRadius; x += dotDiameter) {
+                    if (x * x + y * y <= faceRadius * faceRadius) {  // Check if inside the face
+                        const distanceToLeftEye = Math.sqrt(Math.pow(x - eyeOffsetX, 2) + Math.pow(y - eyeOffsetY, 2));
+                        const distanceToRightEye = Math.sqrt(Math.pow(x + eyeOffsetX, 2) + Math.pow(y - eyeOffsetY, 2));
+                        const isInsideMouth = y - mouthOffsetY <= mouthRadius && y - mouthOffsetY >= 0 &&
+                                              Math.abs(x) <= Math.sqrt(mouthRadius * mouthRadius - Math.pow(y - mouthOffsetY, 2));
+    
+                        if (distanceToLeftEye >= eyeRadius && distanceToRightEye >= eyeRadius && !isInsideMouth) {
+                            const dot = document.createElement('div');
+                            dot.className = 'dot';
+                            dot.style.left = `${x + containerWidth / 2}px`;
+                            dot.style.top = `${y + containerHeight / 2}px`;
+                            container.appendChild(dot);
+                        }
+                    }
+                }
+            }
+        }
+    
+        placeDots();
+    
+        // Hover effect
+        container.addEventListener('mousemove', function(event) {
+            const mouseX = event.clientX - container.getBoundingClientRect().left;
+            const mouseY = event.clientY - container.getBoundingClientRect().top;
+    
+            document.querySelectorAll('.dot').forEach(dot => {
+                const dotX = parseFloat(dot.style.left);
+                const dotY = parseFloat(dot.style.top);
+                const distance = Math.sqrt((mouseX - dotX) ** 2 + (mouseY - dotY) ** 2);
+                if (distance < 30) {  // Distance for interaction
+                    const angle = Math.atan2(mouseY - dotY, mouseX - dotX);
+                    dot.style.transform = `translate(${Math.cos(angle) * 20}px, ${Math.sin(angle) * 20}px)`;
+                } else {
+                    dot.style.transform = '';
+                }
+            });
+        });
+    
+        container.addEventListener('mouseout', () => {
+            document.querySelectorAll('.dot').forEach(dot => {
+                dot.style.transform = '';
+            });
+        });
+    </script>
+    
+</body>
+</html>

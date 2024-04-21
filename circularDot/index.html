@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packed Circle of Dots</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="circle-container" id="dotContainer"></div>
+    <script>
+        const container = document.getElementById('dotContainer');
+        const containerWidth = 600;
+        const containerHeight = 600;
+        const maxRadius = Math.min(containerWidth, containerHeight) / 2 - 20;
+        const hoverRadius = 30;
+        const dotDiameter = 10; // Diameter of each dot
+        const radialIncrement = dotDiameter; // Space between each concentric circle of dots
+
+        function placeDots() {
+            for (let radius = 0; radius <= maxRadius; radius += radialIncrement) {
+                const circumference = 2 * Math.PI * radius;
+                const dotsInThisCircle = Math.floor(circumference / dotDiameter);
+                for (let i = 0; i < dotsInThisCircle; i++) {
+                    const angle = (i / dotsInThisCircle) * 2 * Math.PI;
+                    const x = radius * Math.cos(angle) + containerWidth / 2;
+                    const y = radius * Math.sin(angle) + containerHeight / 2;
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    dot.style.left = `${x}px`;
+                    dot.style.top = `${y}px`;
+                    container.appendChild(dot);
+                }
+            }
+        }
+
+        placeDots();
+
+        // Mouse hover effect: scatter dots
+        container.addEventListener('mousemove', function(event) {
+            const bounds = container.getBoundingClientRect();
+            const mouseX = event.clientX - bounds.left;
+            const mouseY = event.clientY - bounds.top;
+
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.dot').forEach(dot => {
+                    const dotX = parseFloat(dot.style.left);
+                    const dotY = parseFloat(dot.style.top);
+                    const distance = Math.sqrt((mouseX - dotX) ** 2 + (mouseY - dotY) ** 2);
+                    if (distance < hoverRadius) {
+                        const angle = Math.atan2(mouseY - dotY, mouseX - dotX);
+                        dot.style.transform = `translate(${Math.cos(angle) * 20}px, ${Math.sin(angle) * 20}px)`;
+                    } else {
+                        dot.style.transform = '';
+                    }
+                });
+            });
+        });
+
+        container.addEventListener('mouseout', () => {
+            document.querySelectorAll('.dot').forEach(dot => {
+                dot.style.transform = '';
+            });
+        });
+    </script>
+</body>
+</html>
